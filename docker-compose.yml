@@ -1,0 +1,8 @@
+version: '3'
+services:
+  recorder:
+    container_name: chaturbate-recorder
+    image: chaturbate-recorder
+    build: .
+    volumes:
+      - ./chaturbate:${DIRECTORY}
