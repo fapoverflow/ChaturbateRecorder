@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 
-export DIRECTORY=/path/to/directory
+export DIRECTORY=/path/to/download/directory
+export CONFIG=/path/to/config/directory
 docker-compose up -d

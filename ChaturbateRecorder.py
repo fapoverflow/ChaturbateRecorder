@@ -17,13 +17,13 @@ from livestreamer import Livestreamer
 from threading import Thread
 
 config = configparser.ConfigParser()
-config.read(sys.path[0] + "/config.conf")
-log = logging.getLogger("ChaturbateRecorder")
-log_level = str(config.get('settings', 'log_level'))
-log.setLevel(log_level)
+config.read(sys.path[0] + "/config/config.conf")
 save_directory = config.get('paths', 'save_directory')
 wishlist = config.get('paths', 'wishlist')
 interval = int(config.get('settings', 'check_interval'))
+log = logging.getLogger("ChaturbateRecorder")
+log_level = str(config.get('settings', 'log_level'))
+log.setLevel(log_level)
 genders = re.sub(' ', '', config.get('settings', 'genders')).split(",")
 directory_structure = config.get('paths', 'directory_structure').lower()
 post_processing_command = config.get('settings', 'post_processing_command')
@@ -41,6 +41,7 @@ wanted = []
 def start_recording(model):
     global post_processing_command
     global processing_queue
+    log.info("Start recording : {}".format(model))
     try:
         result = requests.get('https://chaturbate.com/api/chatvideocontext/{}/'.format(model)).json()
         session = Livestreamer()
@@ -62,16 +63,19 @@ def start_recording(model):
         directory = file_path.rsplit('/', 1)[0] + '/'
         if not os.path.exists(directory):
             os.makedirs(directory)
+            log.debug("Creating directory {} for : {}".format(directory, model))
         if model in recording:
             return
         with open(file_path, 'wb') as f:
             recording.append(model)
+            log.info("Add to recording : {}".format(model))
             while model in wanted:
                 try:
                     data = fd.read(1024)
                     f.write(data)
                 except Exception as e:
-                    log.info(e)  # stop recording
+                    log.debug("Fail to read stream for : {}".format(model))
+                    log.debug(e)
                     f.close()
                     break
         if post_processing_command:
@@ -89,12 +93,16 @@ def start_recording(model):
                         year=now.strftime("%Y"))
             if not os.path.exists(finished_dir):
                 os.makedirs(finished_dir)
+                log.debug("Creating directory for : {}".format(model))
             os.rename(file_path, finished_dir + '/' + file_path.rsplit['/', 1][0])
+        log.info("Recording : {}".format(model))
     except Exception as e:
-        log.warning(e)
+        # log.warning(e)
+        log.debug(e)
         pass
     finally:
         if model in recording:
+            log.info("Stop recording : {}".format(model))
             recording.remove(model)
 
 
@@ -129,8 +137,11 @@ def get_online_models():
                 data['key'] = result['key']
                 online.extend([m['username'].lower() for m in result['rooms']])
         except Exception as e:
-            log.warning(e)  # failed to fetch online models
+            # # failed to fetch online models
+            # log.warning(e)
+            # log.exception(e)
             break
+    log.debug("Get online models : {}".format(online))
     f = open(wishlist, 'r')
     wanted = list(set(f.readlines()))
     wanted = [m.strip('\n').split('chaturbate.com/')[-1].lower().strip().replace('/', '') for m in wanted]

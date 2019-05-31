@@ -104,6 +104,6 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-wanted.txt
 .idea/
+config/wanted.txt
 deploy.sh

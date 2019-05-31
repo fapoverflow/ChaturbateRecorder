@@ -5,4 +5,5 @@ services:
     image: chaturbate-recorder
     build: .
     volumes:
-      - ./chaturbate:${DIRECTORY}
+      - ${DIRECTORY}:/chaturbate
+      - ${CONFIG}:/config
