@@ -17,7 +17,7 @@ from livestreamer import Livestreamer
 from threading import Thread
 
 config = configparser.ConfigParser()
-config.read(sys.path[0] + "/config/config.conf")
+config.read("/config/config.conf")
 save_directory = config.get('paths', 'save_directory')
 wishlist = config.get('paths', 'wishlist')
 interval = int(config.get('settings', 'check_interval'))
